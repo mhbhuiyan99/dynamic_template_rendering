@@ -1,2 +1,5 @@
 conf/app.conf
 /dynamic_template_rendering
+
+*.test
+*.out
