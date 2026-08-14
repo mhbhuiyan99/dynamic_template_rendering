@@ -44,3 +44,27 @@ func (s *TemplateService) FindTileBlocks(
 
 	return doc.Find(`[data-block="property-tiles"]`)
 }
+
+func (s *TemplateService) FindTileBlock(
+	doc *goquery.Document,
+	blockID string,
+) *goquery.Selection {
+
+	return doc.Find(
+		`[data-block="property-tiles"][id="` + blockID + `"]`,
+	).First()
+}
+
+func (s *TemplateService) GetTileBlockIDs(doc *goquery.Document) []string {
+	var blockIDs []string
+
+	doc.Find(`[data-block="property-tiles"]`).Each(func(_ int, selection *goquery.Selection) {
+		id, exists := selection.Attr("id")
+
+		if exists && id != "" {
+			blockIDs = append(blockIDs, id)
+		}
+	})
+
+	return blockIDs
+}

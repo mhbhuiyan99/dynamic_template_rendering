@@ -1,6 +1,7 @@
 package services
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -39,3 +40,60 @@ func TestFindTileBlocks(t *testing.T) {
 		t.Fatalf("expected 2 tile blocks, got %d", tiles.Length())
 	}
 }
+
+func TestFindTileBlock(t *testing.T) {
+	templatePath := filepath.Join("..", "views", "custom_template.txt")
+
+	service := NewTemplateService(templatePath)
+
+	content, err := service.LoadTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := service.ParseHTML(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	block := service.FindTileBlock(doc, "ile57am")
+
+	if block.Length() != 1 {
+		t.Fatalf("expected 1 tile block, got %d", block.Length())
+	}
+
+	id, exists := block.Attr("id")
+
+	if !exists {
+		t.Fatal("tile block does not have an id")
+	}
+
+	if id != "ile57am" {
+		t.Fatalf("expected ile57am, got %s", id)
+	}
+}
+
+func TestGetTileBlockIDs(t *testing.T) {
+	templatePath := filepath.Join("..", "views", "custom_template.txt")
+
+	service := NewTemplateService(templatePath)
+
+	content, err := service.LoadTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	doc, err := service.ParseHTML(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	blockIDs := service.GetTileBlockIDs(doc)
+
+	t.Logf("Found tile blocks: %v", blockIDs)
+
+	if len(blockIDs) != 7 {
+		t.Fatalf("expected 7 tile blocks, got %d", len(blockIDs))
+	}
+}
+
