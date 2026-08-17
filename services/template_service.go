@@ -86,3 +86,12 @@ func (s *TemplateService) ReplaceTileBlockContent (
 
 	return nil
 }
+
+func (s *TemplateService) RenderHTML(doc *goquery.Document) (string, error) {
+	html, err := goquery.OuterHtml(doc.Selection)
+	if err != nil {
+		return "", fmt.Errorf("failed to render HTML: %w", err)
+	}
+
+	return html, nil
+}

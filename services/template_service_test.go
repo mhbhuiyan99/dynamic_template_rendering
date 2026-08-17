@@ -161,3 +161,71 @@ func TestReplaceTileBlockContent(t *testing.T) {
 	}
 }
 
+func TestRealTemplateTileReplacement(t *testing.T) {
+	templatePath := filepath.Join("..", "views", "custom_template.txt")
+
+	service := NewTemplateService(templatePath)
+
+	// 1. Load the real template.
+	content, err := service.LoadTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 2. Parse the real template using GoQuery.
+	doc, err := service.ParseHTML(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 3. Replace only one tile block.
+	testHTML := `
+<div class="tiles-wrapper">
+	<div class="tiles-item">
+		TEST PROPERTY
+	</div>
+</div>
+`
+
+	err = service.ReplaceTileBlockContent(
+		doc,
+		"ile57am",
+		testHTML,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 4. Convert the modified document back to HTML.
+	result, err := service.RenderHTML(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 5. Verify our new content exists.
+	if !strings.Contains(result, "TEST PROPERTY") {
+		t.Fatal("replacement content was not found")
+	}
+
+	// 6. Verify the tile block itself still exists.
+	if !strings.Contains(result, `id="ile57am"`) {
+		t.Fatal("original tile block was removed")
+	}
+
+	// 7. Verify other known blocks still exist.
+	otherBlocks := []string{
+		"ipv1476",
+		"i79etyf",
+		"iga91sh",
+		"i0fx4v9",
+		"i27435y",
+		"i5w70hj",
+	}
+
+	for _, blockID := range otherBlocks {
+		if !strings.Contains(result, `id="`+blockID+`"`) {
+			t.Fatalf("other tile block %s was removed", blockID)
+		}
+	}
+}
+
