@@ -97,3 +97,67 @@ func TestGetTileBlockIDs(t *testing.T) {
 	}
 }
 
+func TestReplaceTileBlockContent(t *testing.T) {
+	html := `
+<html>
+<body>
+
+<div
+    data-block="property-tiles"
+    id="ile57am"
+    class="pres__tiles-container"
+>
+    <div class="tiles-wrapper">
+        OLD CONTENT
+    </div>
+</div>
+
+<footer>
+    Keep me
+</footer>
+
+</body>
+</html>
+`
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	service := NewTemplateService("")
+
+	newHTML := `
+<div class="tiles-wrapper">
+    <div class="tiles-item">
+        NEW PROPERTY
+    </div>
+</div>
+`
+
+	err = service.ReplaceTileBlockContent(
+		doc,
+		"ile57am",
+		newHTML,
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify the old content is gone.
+	if strings.Contains(doc.Text(), "OLD CONTENT") {
+		t.Fatal("old content still exists")
+	}
+
+	// Verify new content exists.
+	if !strings.Contains(doc.Text(), "NEW PROPERTY") {
+		t.Fatal("new content was not inserted")
+	}
+
+	// Verify unrelated HTML still exists.
+	if !strings.Contains(doc.Text(), "Keep me") {
+		t.Fatal("unrelated content was removed")
+	}
+}
+

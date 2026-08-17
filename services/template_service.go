@@ -68,3 +68,21 @@ func (s *TemplateService) GetTileBlockIDs(doc *goquery.Document) []string {
 
 	return blockIDs
 }
+
+func (s *TemplateService) ReplaceTileBlockContent (
+	doc *goquery.Document, 
+	blockID string,
+	newHTML string,
+) error {
+	
+	block := s.FindTileBlock(doc, blockID)
+
+	if block.Length() == 0 {
+		return fmt.Errorf("tile block with ID '%s' not found", blockID)
+	}
+
+	block.Empty()
+	block.AppendHtml(newHTML)
+
+	return nil
+}
