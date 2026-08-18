@@ -1,3 +1,5 @@
 appname = dynamic_template_rendering
 httpport = 8080
 runmode = dev
+
+base_url = <ADD YOURS>
