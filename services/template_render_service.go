@@ -26,6 +26,22 @@ func NewTemplateRenderService(
 }
 
 func (s *TemplateRenderService) Render() (string, error) {
+	if s == nil {
+		return "", fmt.Errorf("template render service is nil")
+	}
+
+	if s.templateService == nil {
+		return "", fmt.Errorf("template service is nil")
+	}
+
+	if s.tileService == nil {
+		return "", fmt.Errorf("tile service is nil")
+	}
+
+	if s.tileRenderer == nil {
+		return "", fmt.Errorf("tile renderer is nil")
+	}
+
 	// Load the original HTML template.
 	content, err := s.templateService.LoadTemplate()
 	if err != nil {
@@ -36,9 +52,8 @@ func (s *TemplateRenderService) Render() (string, error) {
 	doc, err := s.templateService.ParseHTML(content)
 	if err != nil {
 		return "", err
-	} 
+	}
 
-	// Process every tile configuration.
 	for _, tileConfig := range config.TileConfigs {
 		if tileConfig.TilesBlockID == "" {
 			continue
@@ -46,7 +61,6 @@ func (s *TemplateRenderService) Render() (string, error) {
 
 		properties, err := s.tileService.GetProperties(tileConfig)
 		if err != nil {
-			// One tile failing should not stop the whole page.
 			fmt.Printf(
 				"failed to get properties for tile block %s: %v\n",
 				tileConfig.TilesBlockID,
@@ -79,6 +93,5 @@ func (s *TemplateRenderService) Render() (string, error) {
 		}
 	}
 
-	// Return the final HTML.
 	return s.templateService.RenderHTML(doc)
 }
