@@ -15,14 +15,6 @@ import (
 
 const categoryAPIPath = "/api/v1/category/details/usa:hawaii"
 
-type CategoryResponse struct {
-	Error   interface{} `json:"Error"`
-	Message string      `json:"Message"`
-	Success bool        `json:"Success"`
-	Result  struct {
-		Items interface{} `json:"Items"`
-	} `json:"Result"`
-}
 
 type CategoryService struct {
 	BaseURL string
@@ -73,7 +65,7 @@ func (s *CategoryService) BuildRequest(
 
 func (s *CategoryService) FetchProperties(
 	config models.TileConfig,
-) (*CategoryResponse, error) {
+) (*models.CategoryResponse, error) {
 
 	req, err := s.BuildRequest(config)
 	if err != nil {
@@ -94,7 +86,7 @@ func (s *CategoryService) FetchProperties(
 		)
 	}
 
-	var result CategoryResponse
+	var result models.CategoryResponse
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("decode category API response: %w", err)
