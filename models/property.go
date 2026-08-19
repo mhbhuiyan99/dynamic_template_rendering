@@ -32,3 +32,21 @@ type PropertyData struct {
 	Address       string  `json:"Address"`
 	Price         float64 `json:"Price"`
 }
+
+type Property struct {
+	ID       string
+	Name     string
+	Image    string
+	Location string
+	Price    float64
+}
+
+func ToProperty(item CategoryItem) Property {
+	return Property{
+		ID:       item.ID,
+		Name:     item.Property.PropertyName,
+		Image:    item.Property.FeatureImage,
+		Location: item.GeoInfo.Display,
+		Price:    item.Property.Price,
+	}
+}

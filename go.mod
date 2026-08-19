@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.12.0
+	github.com/agiledragon/gomonkey/v2 v2.14.2
 	github.com/beego/beego/v2 v2.3.10
 	github.com/stretchr/testify v1.10.0
 )
