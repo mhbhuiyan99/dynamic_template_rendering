@@ -19,7 +19,7 @@ func NewCustomTemplateController(
 }
 
 func (c *CustomTemplateController) Get() {
-	html, err := c.TemplateRenderService.Render()
+	html, err := c.TemplateRenderService.RenderPage()
 	if err != nil {
 		c.CustomAbort(500, err.Error())
 		return

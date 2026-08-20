@@ -13,22 +13,42 @@ import (
 	"github.com/beego/beego/v2/server/web"
 )
 
-const categoryAPIPath = "/api/v1/category/details/usa:hawaii"
-
+const categoryAPIPath = "/api/v1/category/details/usa"
 
 type CategoryService struct {
-	BaseURL string
-	Client  *http.Client
+	BaseURL  string
+	Username string
+	Password string
+	APIKey   string
+	Client   *http.Client
 }
 
 func NewCategoryService() *CategoryService {
 	baseURL := web.AppConfig.DefaultString(
-		"category_api_base_url",
+		"base_url",
+		"",
+	)
+
+	username := web.AppConfig.DefaultString(
+		"username",
+		"",
+	)
+
+	password := web.AppConfig.DefaultString(
+		"password",
+		"",
+	)
+
+	apiKey := web.AppConfig.DefaultString(
+		"api_key",
 		"",
 	)
 
 	return &CategoryService{
-		BaseURL: strings.TrimRight(baseURL, "/"),
+		BaseURL:  strings.TrimRight(baseURL, "/"),
+		Username: username,
+		Password: password,
+		APIKey:   apiKey,
 		Client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
@@ -40,6 +60,10 @@ func (s *CategoryService) BuildRequest(
 ) (*http.Request, error) {
 
 	params := url.Values{}
+
+	// Required by the category API.
+	// Without items=1, property IDs are not returned.
+	params.Set("items", "1")
 
 	if config.PT != "" {
 		params.Set("pt", config.PT)
@@ -59,9 +83,19 @@ func (s *CategoryService) BuildRequest(
 		requestURL += "?" + encodedParams
 	}
 
-	return http.NewRequest(http.MethodGet, requestURL, nil)
-}
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
+	if err != nil {
+		return nil, err
+	}
 
+	req.SetBasicAuth(s.Username, s.Password)
+
+	if s.APIKey != "" {
+		req.Header.Set("x-api-key", s.APIKey)
+	}
+
+	return req, nil
+}
 
 func (s *CategoryService) FetchProperties(
 	config models.TileConfig,
