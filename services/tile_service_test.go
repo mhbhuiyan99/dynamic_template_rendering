@@ -17,6 +17,7 @@ func TestTileService_GetProperties(t *testing.T) {
 	t.Run("successfully converts and limits properties", func(t *testing.T) {
 		config := models.TileConfig{
 			TilesPerPage: 2,
+			TotalTiles:   2,
 		}
 
 		response := models.CategoryResponse{

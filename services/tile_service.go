@@ -30,7 +30,11 @@ func (s *TileService) GetProperties(
 
 	items := response.Result.Items
 
-	limit := config.TilesPerPage
+	// TilesPerPage controls the row width; TotalTiles controls the full result.
+	limit := config.TotalTiles
+	if limit <= 0 {
+		limit = config.TilesPerPage
+	}
 
 	if len(items) > limit {
 		items = items[:limit]

@@ -1,7 +1,9 @@
 package services
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 	"strings"
 
@@ -27,6 +29,23 @@ func (s *TemplateService) LoadTemplate() (string, error) {
 	return string(content), nil
 }
 
+func (s *TemplateService) ExecuteTemplate(
+	content string,
+	data interface{},
+) (string, error) {
+	tmpl, err := template.New("custom-template").Parse(content)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse template: %w", err)
+	}
+
+	var rendered bytes.Buffer
+	if err := tmpl.Execute(&rendered, data); err != nil {
+		return "", fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	return rendered.String(), nil
+}
+
 func (s *TemplateService) ParseHTML(content string) (*goquery.Document, error) {
 	reader := strings.NewReader(content)
 
@@ -49,10 +68,25 @@ func (s *TemplateService) FindTileBlock(
 	doc *goquery.Document,
 	blockID string,
 ) *goquery.Selection {
+	var block *goquery.Selection
 
-	return doc.Find(
-		`[data-block="property-tiles"][id="` + blockID + `"]`,
-	).First()
+	doc.Find(`[data-block="property-tiles"]`).EachWithBreak(
+		func(_ int, selection *goquery.Selection) bool {
+			id, exists := selection.Attr("id")
+			if exists && id == blockID {
+				block = selection
+				return false
+			}
+
+			return true
+		},
+	)
+
+	if block == nil {
+		return doc.Find("#__missing_tile_block__")
+	}
+
+	return block
 }
 
 func (s *TemplateService) GetTileBlockIDs(doc *goquery.Document) []string {
@@ -69,12 +103,12 @@ func (s *TemplateService) GetTileBlockIDs(doc *goquery.Document) []string {
 	return blockIDs
 }
 
-func (s *TemplateService) ReplaceTileBlockContent (
-	doc *goquery.Document, 
+func (s *TemplateService) ReplaceTileBlockContent(
+	doc *goquery.Document,
 	blockID string,
 	newHTML string,
 ) error {
-	
+
 	block := s.FindTileBlock(doc, blockID)
 
 	if block.Length() == 0 {

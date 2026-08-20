@@ -61,10 +61,6 @@ func (s *CategoryService) BuildRequest(
 
 	params := url.Values{}
 
-	// Required by the category API.
-	// Without items=1, property IDs are not returned.
-	params.Set("items", "1")
-
 	if config.PT != "" {
 		params.Set("pt", config.PT)
 	}
@@ -75,6 +71,11 @@ func (s *CategoryService) BuildRequest(
 
 	if config.Order != "" {
 		params.Set("order", config.Order)
+	}
+
+	// Request property IDs for configured tile queries.
+	if len(params) > 0 {
+		params.Set("items", "1")
 	}
 
 	requestURL := s.BaseURL + categoryAPIPath

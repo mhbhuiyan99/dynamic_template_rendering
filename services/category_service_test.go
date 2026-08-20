@@ -31,7 +31,7 @@ func TestCategoryService_BuildRequest(t *testing.T) {
 	assert.Equal(t, "GET", req.Method)
 	assert.Equal(
 		t,
-		"https://example.com/api/v1/category/details/usa:hawaii",
+		"https://example.com/api/v1/category/details/usa",
 		req.URL.Scheme+"://"+req.URL.Host+req.URL.Path,
 	)
 
@@ -58,7 +58,7 @@ func TestCategoryService_BuildRequest_EmptyParameters(t *testing.T) {
 
 	assert.Equal(
 		t,
-		"https://example.com/api/v1/category/details/usa:hawaii",
+		"https://example.com/api/v1/category/details/usa",
 		req.URL.String(),
 	)
 }
@@ -71,7 +71,7 @@ func TestCategoryService_FetchProperties_Success(t *testing.T) {
 		assert.Equal(t, http.MethodGet, r.Method)
 		assert.Equal(
 			t,
-			"/api/v1/category/details/usa:hawaii",
+			"/api/v1/category/details/usa",
 			r.URL.Path,
 		)
 

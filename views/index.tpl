@@ -4,16 +4,21 @@
 <head>
   <link
       rel="stylesheet"
-      href="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-template-css-file.css?v=1.3000000000000003"
+      href="/static/css/category-template-base.css"
   />
 
   <link
       rel="stylesheet"
-      href="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-css-file.css?v=1.3000000000000003"
+      href="/static/css/category-template.css"
   />
 
+    <link
+      rel="stylesheet"
+      href="/static/css/tile-overrides.css"
+    />
+
   <script
-      src="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-js-file.js?v=1.3000000000000003"
+      src="/static/js/category-template.js"
       defer
   ></script>
 </head>

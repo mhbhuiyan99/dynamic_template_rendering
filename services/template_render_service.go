@@ -13,6 +13,20 @@ type TemplateRenderService struct {
 	tileRenderer    *renderers.TileRenderer
 }
 
+type templateData struct {
+	LocationName string
+}
+
+func configuredLocationName() string {
+	for _, tileConfig := range config.TileConfigs {
+		if tileConfig.Keyword != "" {
+			return tileConfig.Keyword
+		}
+	}
+
+	return ""
+}
+
 func NewTemplateRenderService(
 	templateService *TemplateService,
 	tileService *TileService,
@@ -48,12 +62,18 @@ func (s *TemplateRenderService) Render() (string, error) {
 		return "", err
 	}
 
+	content, err = s.templateService.ExecuteTemplate(content, templateData{
+		LocationName: configuredLocationName(),
+	})
+	if err != nil {
+		return "", err
+	}
+
 	// Parse the HTML so we can find and replace tile blocks.
 	doc, err := s.templateService.ParseHTML(content)
 	if err != nil {
 		return "", err
 	}
-	
 
 	for _, tileConfig := range config.TileConfigs {
 		if tileConfig.TilesBlockID == "" {
@@ -110,16 +130,21 @@ func (s *TemplateRenderService) RenderPage() (string, error) {
 
 	<link
 		rel="stylesheet"
-		href="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-template-css-file.css?v=1.3000000000000003"
+		href="/static/css/category-template-base.css"
 	>
 
 	<link
 		rel="stylesheet"
-		href="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-css-file.css?v=1.3000000000000003"
+		href="/static/css/category-template.css"
+	>
+
+	<link
+		rel="stylesheet"
+		href="/static/css/tile-overrides.css"
 	>
 
 	<script
-		src="https://cdn.123presto.com/canary/preview/category-template-latest/category-template-latest-js-file.js?v=1.3000000000000003"
+		src="/static/js/category-template.js"
 		defer
 	></script>
 </head>
