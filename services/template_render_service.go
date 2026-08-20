@@ -42,7 +42,7 @@ func (s *TemplateRenderService) Render() (string, error) {
 		return "", fmt.Errorf("tile renderer is nil")
 	}
 
-	// Load the original HTML template.
+	// Execute the .txt file as a Go template before parsing its HTML structure.
 	content, err := s.templateService.LoadTemplate()
 	if err != nil {
 		return "", err
@@ -69,11 +69,6 @@ func (s *TemplateRenderService) Render() (string, error) {
 			)
 			continue
 		}
-		fmt.Printf(
-	"Tile block %s: API returned %d properties\n",
-	tileConfig.TilesBlockID,
-	len(properties),
-)
 
 		tileHTML, err := s.tileRenderer.Render(properties)
 		if err != nil {

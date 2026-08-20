@@ -39,6 +39,7 @@ func (s *TileService) GetProperties(
 	properties := make([]models.Property, 0, len(items))
 
 	for _, item := range items {
+
 		properties = append(
 			properties,
 			models.ToProperty(item),

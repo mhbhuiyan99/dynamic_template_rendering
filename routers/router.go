@@ -19,7 +19,17 @@ func init() {
 		"views/custom_template.txt",
 	)
 
-	tileRenderer := renderers.NewTileRenderer()
+	baseURL := web.AppConfig.DefaultString(
+		"base_url",
+		"",
+	)
+
+	imageBaseURL := web.AppConfig.DefaultString(
+		"image_base_url",
+		"",
+	)
+
+	tileRenderer := renderers.NewTileRenderer(baseURL, imageBaseURL)
 
 	templateRenderService := services.NewTemplateRenderService(
 		templateService,

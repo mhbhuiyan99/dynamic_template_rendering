@@ -14,7 +14,7 @@ import (
 func TestTemplateRenderService_Render(t *testing.T) {
 	templateService := NewTemplateService("dummy.txt")
 	tileService := &TileService{}
-	tileRenderer := renderers.NewTileRenderer()
+	tileRenderer := renderers.NewTileRenderer("http://example.com", "http://imageservice.example.com")
 
 	service := NewTemplateRenderService(
 		templateService,
