@@ -60,14 +60,14 @@ Static styles and scripts are served from `/static/` by Beego.
 
 1. `routers/router.go` wires the template, tile, category, and renderer services.
 2. `services/TemplateService` loads and executes `views/custom_template.txt` as a Go template.
-3. `services/CategoryService` requests property data from:
+3. `requests/CategoryRequest` requests property data from:
 
    ```text
    GET {base_url}/api/v1/category/details/usa
    ```
 
-   Tile settings such as `pt`, `amenities`, and `order` are sent as query parameters.
-4. `services/TileService` converts API results into properties and limits the result using `TotalTiles` (or `TilesPerPage` when `TotalTiles` is not set).
+   Tile settings such as `pt`, `amenities`, and `order` are sent as query parameters. Common HTTP behavior is handled by `requests/Client`, including authentication, timeout, status validation, and JSON decoding.
+4. `services/CategoryService` delegates API access to `requests/CategoryRequest`, while `services/TileService` converts API results into properties and limits the result using `TotalTiles` (or `TilesPerPage` when `TotalTiles` is not set).
 5. `renderers/TileRenderer` creates the property-card HTML.
 6. Each configured tile block with `data-block="property-tiles"` is replaced by matching `TilesBlockID` in `config/tiles.go`.
 
@@ -113,6 +113,7 @@ The test suite covers API request construction and responses, template parsing a
 config/       Tile query configuration
 controllers/  HTTP controllers
 models/       API and application data models
+requests/     Shared HTTP client and Category API requests
 renderers/    Property-tile HTML rendering
 routers/      Beego route registration
 services/     API, template, tile, and orchestration services

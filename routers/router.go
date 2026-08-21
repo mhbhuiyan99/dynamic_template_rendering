@@ -1,15 +1,26 @@
 package routers
 
 import (
+	"dynamic_template_rendering/config"
 	"dynamic_template_rendering/controllers"
 	"dynamic_template_rendering/renderers"
+	"dynamic_template_rendering/requests"
 	"dynamic_template_rendering/services"
 
 	"github.com/beego/beego/v2/server/web"
 )
 
 func init() {
-	categoryService := services.NewCategoryService()
+	apiConfig := config.LoadAPIConfig()
+	categoryRequest := requests.NewCategoryRequest(
+		requests.NewClient(
+			apiConfig.BaseURL,
+			apiConfig.Username,
+			apiConfig.Password,
+			apiConfig.APIKey,
+		),
+	)
+	categoryService := services.NewCategoryService(categoryRequest)
 
 	tileService := services.NewTileService(
 		categoryService,
@@ -19,17 +30,10 @@ func init() {
 		"views/custom_template.txt",
 	)
 
-	baseURL := web.AppConfig.DefaultString(
-		"base_url",
-		"",
+	tileRenderer := renderers.NewTileRenderer(
+		apiConfig.BaseURL,
+		apiConfig.ImageBaseURL,
 	)
-
-	imageBaseURL := web.AppConfig.DefaultString(
-		"image_base_url",
-		"",
-	)
-
-	tileRenderer := renderers.NewTileRenderer(baseURL, imageBaseURL)
 
 	templateRenderService := services.NewTemplateRenderService(
 		templateService,
