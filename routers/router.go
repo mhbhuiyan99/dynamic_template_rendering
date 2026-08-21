@@ -45,4 +45,15 @@ func init() {
 		"/custom-template",
 		controller,
 	)
+
+	categoryLocationService := services.NewCategoryLocationService()
+
+	categoryController := controllers.NewCategoryController(
+		categoryLocationService,
+	)
+
+	web.Router(
+		"/all/*",
+		categoryController,
+	)
 }
