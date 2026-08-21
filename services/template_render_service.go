@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"dynamic_template_rendering/config"
+	"dynamic_template_rendering/models"
 	"dynamic_template_rendering/renderers"
 )
 
@@ -17,8 +18,8 @@ type templateData struct {
 	LocationName string
 }
 
-func configuredLocationName() string {
-	for _, tileConfig := range config.TileConfigs {
+func configuredLocationName(tileConfigs []models.TileConfig) string {
+	for _, tileConfig := range tileConfigs {
 		if tileConfig.Keyword != "" {
 			return tileConfig.Keyword
 		}
@@ -40,6 +41,18 @@ func NewTemplateRenderService(
 }
 
 func (s *TemplateRenderService) Render() (string, error) {
+	return s.render("")
+}
+
+func (s *TemplateRenderService) RenderForLocation(location string) (string, error) {
+	if location == "" {
+		return "", fmt.Errorf("category location is empty")
+	}
+
+	return s.render(location)
+}
+
+func (s *TemplateRenderService) render(location string) (string, error) {
 	if s == nil {
 		return "", fmt.Errorf("template render service is nil")
 	}
@@ -56,6 +69,14 @@ func (s *TemplateRenderService) Render() (string, error) {
 		return "", fmt.Errorf("tile renderer is nil")
 	}
 
+	tileConfigs := make([]models.TileConfig, len(config.TileConfigs))
+	copy(tileConfigs, config.TileConfigs)
+	if location != "" {
+		for index := range tileConfigs {
+			tileConfigs[index].Keyword = location
+		}
+	}
+
 	// Execute the .txt file as a Go template before parsing its HTML structure.
 	content, err := s.templateService.LoadTemplate()
 	if err != nil {
@@ -63,7 +84,7 @@ func (s *TemplateRenderService) Render() (string, error) {
 	}
 
 	content, err = s.templateService.ExecuteTemplate(content, templateData{
-		LocationName: configuredLocationName(),
+		LocationName: configuredLocationName(tileConfigs),
 	})
 	if err != nil {
 		return "", err
@@ -75,7 +96,7 @@ func (s *TemplateRenderService) Render() (string, error) {
 		return "", err
 	}
 
-	for _, tileConfig := range config.TileConfigs {
+	for _, tileConfig := range tileConfigs {
 		if tileConfig.TilesBlockID == "" {
 			continue
 		}
@@ -118,7 +139,14 @@ func (s *TemplateRenderService) Render() (string, error) {
 }
 
 func (s *TemplateRenderService) RenderPage() (string, error) {
-	content, err := s.Render()
+	return s.renderPage(s.Render())
+}
+
+func (s *TemplateRenderService) RenderPageForLocation(location string) (string, error) {
+	return s.renderPage(s.RenderForLocation(location))
+}
+
+func (s *TemplateRenderService) renderPage(content string, err error) (string, error) {
 	if err != nil {
 		return "", err
 	}

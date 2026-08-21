@@ -7,7 +7,7 @@ import (
 	"dynamic_template_rendering/models"
 )
 
-const categoryAPIPath = "/api/v1/category/details/usa"
+const categoryAPIPath = "/api/v1/category/details/"
 
 // CategoryRequest handles communication with the Category API.
 type CategoryRequest struct {
@@ -21,6 +21,9 @@ func NewCategoryRequest(client *Client) *CategoryRequest {
 func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryResponse, error) {
 	if r == nil || r.client == nil {
 		return nil, fmt.Errorf("category request client is nil")
+	}
+	if config.Keyword == "" {
+		return nil, fmt.Errorf("category location keyword is empty")
 	}
 
 	queryParams := url.Values{}
@@ -39,7 +42,7 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 
 	requestURL, err := BuildURL(
 		r.client.BaseURL,
-		categoryAPIPath,
+		categoryAPIPath+url.PathEscape(config.Keyword),
 		queryParams,
 	)
 	if err != nil {

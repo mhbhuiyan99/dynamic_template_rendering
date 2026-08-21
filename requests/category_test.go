@@ -17,7 +17,7 @@ func TestCategoryRequest_Fetch(t *testing.T) {
 		request *http.Request,
 	) {
 		assert.Equal(t, http.MethodGet, request.Method)
-		assert.Equal(t, "/api/v1/category/details/usa", request.URL.Path)
+		assert.Equal(t, "/api/v1/category/details/usa:texas", request.URL.Path)
 		assert.Equal(t, "5-7", request.URL.Query().Get("pt"))
 		assert.Equal(t, "1", request.URL.Query().Get("order"))
 
@@ -38,8 +38,9 @@ func TestCategoryRequest_Fetch(t *testing.T) {
 	requestLayer := NewCategoryRequest(client)
 
 	result, err := requestLayer.Fetch(models.TileConfig{
-		PT:    "5-7",
-		Order: "1",
+		Keyword: "usa:texas",
+		PT:      "5-7",
+		Order:   "1",
 	})
 
 	require.NoError(t, err)
@@ -57,9 +58,21 @@ func TestCategoryRequest_FetchHTTPError(t *testing.T) {
 	defer server.Close()
 
 	requestLayer := NewCategoryRequest(NewClient(server.URL, "", "", ""))
-	result, err := requestLayer.Fetch(models.TileConfig{PT: "5-7"})
+	result, err := requestLayer.Fetch(models.TileConfig{
+		Keyword: "usa",
+		PT:      "5-7",
+	})
 
 	assert.Nil(t, result)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "unexpected HTTP status: 401")
+}
+
+func TestCategoryRequest_FetchRequiresKeyword(t *testing.T) {
+	requestLayer := NewCategoryRequest(NewClient("http://example.com", "", "", ""))
+
+	result, err := requestLayer.Fetch(models.TileConfig{})
+
+	assert.Nil(t, result)
+	assert.EqualError(t, err, "category location keyword is empty")
 }

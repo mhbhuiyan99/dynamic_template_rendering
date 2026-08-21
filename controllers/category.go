@@ -12,13 +12,16 @@ type CategoryController struct {
 	web.Controller
 
 	categoryLocationService *services.CategoryLocationService
+	templateRenderService   *services.TemplateRenderService
 }
 
 func NewCategoryController(
 	categoryLocationService *services.CategoryLocationService,
+	templateRenderService *services.TemplateRenderService,
 ) *CategoryController {
 	return &CategoryController{
 		categoryLocationService: categoryLocationService,
+		templateRenderService:   templateRenderService,
 	}
 }
 
@@ -34,7 +37,16 @@ func (c *CategoryController) Get() {
 		return
 	}
 
-	c.Ctx.WriteString(
-		"Category location: " + location.Keyword,
+	html, err := c.templateRenderService.RenderPageForLocation(location.Keyword)
+	if err != nil {
+		c.CustomAbort(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Ctx.ResponseWriter.Header().Set(
+		"Content-Type",
+		"text/html; charset=utf-8",
 	)
+
+	c.Ctx.WriteString(html)
 }

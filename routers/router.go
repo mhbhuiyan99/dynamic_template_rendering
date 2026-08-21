@@ -54,6 +54,7 @@ func init() {
 
 	categoryController := controllers.NewCategoryController(
 		categoryLocationService,
+		templateRenderService,
 	)
 
 	web.Router(
