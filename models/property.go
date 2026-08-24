@@ -1,14 +1,33 @@
 package models
 
 type CategoryResponse struct {
-	Error   interface{}    `json:"Error"`
-	Message string         `json:"Message"`
-	Success bool           `json:"Success"`
-	Result  CategoryResult `json:"Result"`
+	Error        interface{}     `json:"Error"`
+	Message      string          `json:"Message"`
+	Success      bool            `json:"Success"`
+	GeoInfo      CategoryGeoInfo `json:"GeoInfo"`
+	Result       CategoryResult  `json:"Result"`
+	NearbyCities NearbyCities    `json:"NearbyCities"`
+}
+
+type CategoryGeoInfo struct {
+	Name string `json:"Name"`
+}
+
+type NearbyCities struct {
+	Items []NearbyCity `json:"Items"`
+	Count int          `json:"Count"`
+}
+
+type NearbyCity struct {
+	Display       string `json:"Display"`
+	Name          string `json:"Name"`
+	Slug          string `json:"Slug"`
+	PropertyCount int    `json:"PropertyCount"`
 }
 
 type CategoryResult struct {
-	Items []CategoryItem `json:"Items"`
+	Items        []CategoryItem `json:"Items"`
+	NearbyCities NearbyCities   `json:"NearbyCities"`
 }
 
 type CategoryItem struct {

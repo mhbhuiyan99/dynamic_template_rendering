@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 
 	"dynamic_template_rendering/config"
 	"dynamic_template_rendering/models"
@@ -27,11 +28,23 @@ type tileFetchResult struct {
 func configuredLocationName(tileConfigs []models.TileConfig) string {
 	for _, tileConfig := range tileConfigs {
 		if tileConfig.Keyword != "" {
-			return tileConfig.Keyword
+			return formatLocationName(tileConfig.Keyword)
 		}
 	}
 
 	return ""
+}
+
+func formatLocationName(location string) string {
+	parts := strings.Split(location, ":")
+	for index, part := range parts {
+		if part == "" {
+			continue
+		}
+		parts[index] = strings.ToUpper(part[:1]) + strings.ToLower(part[1:])
+	}
+
+	return strings.Join(parts, ": ")
 }
 
 func NewTemplateRenderService(
@@ -83,6 +96,24 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 		}
 	}
 
+	locationName := configuredLocationName(tileConfigs)
+	var nearbyLocations []models.NearbyCity
+	if location != "" {
+		nearbyResponse, err := s.tileService.GetNearbyResponse(location, 12)
+		if err != nil {
+			fmt.Printf("failed to get nearby locations: %v\n", err)
+		} else {
+			locationName = nearbyResponse.GeoInfo.Name
+			nearbyLocations = nearbyResponse.NearbyCities.Items
+			if len(nearbyLocations) == 0 {
+				nearbyLocations = nearbyResponse.Result.NearbyCities.Items
+			}
+		}
+	}
+	if locationName == "" {
+		locationName = configuredLocationName(tileConfigs)
+	}
+
 	// Execute the .txt file as a Go template before parsing its HTML structure.
 	content, err := s.templateService.LoadTemplate()
 	if err != nil {
@@ -90,7 +121,7 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 	}
 
 	content, err = s.templateService.ExecuteTemplate(content, templateData{
-		LocationName: configuredLocationName(tileConfigs),
+		LocationName: locationName,
 	})
 	if err != nil {
 		return "", err
@@ -185,6 +216,15 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 				tileConfig.TilesBlockID,
 				err,
 			)
+		}
+	}
+
+	if location != "" {
+		if err := s.templateService.ReplaceNearbyLocations(
+			doc,
+			renderers.RenderNearbyLocations(nearbyLocations),
+		); err != nil {
+			fmt.Printf("failed to replace nearby locations: %v\n", err)
 		}
 	}
 

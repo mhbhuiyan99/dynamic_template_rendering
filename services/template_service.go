@@ -121,6 +121,21 @@ func (s *TemplateService) ReplaceTileBlockContent(
 	return nil
 }
 
+func (s *TemplateService) ReplaceNearbyLocations(
+	doc *goquery.Document,
+	newHTML string,
+) error {
+	block := doc.Find(`[data-gjs-type="nearby-places-widget"] [data-spr="nearby-places-widget"]`)
+	if block.Length() == 0 {
+		return fmt.Errorf("nearby locations block not found")
+	}
+
+	block.Empty()
+	block.AppendHtml(newHTML)
+
+	return nil
+}
+
 func (s *TemplateService) RenderHTML(doc *goquery.Document) (string, error) {
 	html, err := goquery.OuterHtml(doc.Selection)
 	if err != nil {

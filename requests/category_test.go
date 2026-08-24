@@ -79,3 +79,27 @@ func TestCategoryRequest_FetchRequiresKeyword(t *testing.T) {
 	assert.Nil(t, result)
 	assert.EqualError(t, err, "category location keyword is empty")
 }
+
+func TestCategoryRequest_FetchNearby(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(
+		responseWriter http.ResponseWriter,
+		request *http.Request,
+	) {
+		assert.Equal(t, "/api/v1/category/details/usa:hawaii", request.URL.Path)
+		assert.Equal(t, "desktop", request.URL.Query().Get("device"))
+		assert.Equal(t, "1", request.URL.Query().Get("items"))
+		assert.Equal(t, "US", request.URL.Query().Get("locations"))
+		assert.Equal(t, "12", request.URL.Query().Get("nearby"))
+		_, _ = responseWriter.Write([]byte(`{
+			"Success": true,
+			"NearbyCities": {"Count": 1, "Items": [{"Name": "Florida", "Slug": "usa/florida"}]}
+		}`))
+	}))
+	defer server.Close()
+
+	result, err := NewCategoryRequest(NewClient(server.URL, "", "", "")).FetchNearby("usa:hawaii", 12)
+
+	require.NoError(t, err)
+	require.Len(t, result.NearbyCities.Items, 1)
+	assert.Equal(t, "usa/florida", result.NearbyCities.Items[0].Slug)
+}

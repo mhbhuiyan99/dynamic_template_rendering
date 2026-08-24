@@ -24,3 +24,14 @@ func (s *CategoryService) FetchProperties(
 
 	return s.categoryRequest.Fetch(config)
 }
+
+func (s *CategoryService) FetchNearby(
+	keyword string,
+	count int,
+) (*models.CategoryResponse, error) {
+	if s == nil || s.categoryRequest == nil {
+		return nil, fmt.Errorf("category service is not configured")
+	}
+
+	return s.categoryRequest.FetchNearby(keyword, count)
+}

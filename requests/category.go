@@ -16,6 +16,8 @@ const (
 	categoryLocations = "US"
 )
 
+const defaultNearbyCount = 12
+
 // CategoryRequest handles communication with the Category API.
 type CategoryRequest struct {
 	client *Client
@@ -25,11 +27,24 @@ func NewCategoryRequest(client *Client) *CategoryRequest {
 	return &CategoryRequest{client: client}
 }
 
+//go:noinline
 func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryResponse, error) {
+	return r.fetch(config.Keyword, config, 0)
+}
+
+func (r *CategoryRequest) FetchNearby(keyword string, count int) (*models.CategoryResponse, error) {
+	if count <= 0 {
+		count = defaultNearbyCount
+	}
+
+	return r.fetch(keyword, models.TileConfig{Keyword: keyword}, count)
+}
+
+func (r *CategoryRequest) fetch(keyword string, config models.TileConfig, nearby int) (*models.CategoryResponse, error) {
 	if r == nil || r.client == nil {
 		return nil, fmt.Errorf("category request client is nil")
 	}
-	if config.Keyword == "" {
+	if keyword == "" {
 		return nil, fmt.Errorf("category location keyword is empty")
 	}
 
@@ -37,6 +52,9 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 	queryParams.Set("device", categoryDevice)
 	queryParams.Set("items", categoryItems)
 	queryParams.Set("locations", categoryLocations)
+	if nearby > 0 {
+		queryParams.Set("nearby", fmt.Sprintf("%d", nearby))
+	}
 	if config.PT != "" {
 		queryParams.Set("pt", config.PT)
 	}
@@ -48,7 +66,7 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 	}
 	requestURL, err := BuildURL(
 		r.client.BaseURL,
-		categoryAPIPath+url.PathEscape(strings.ToLower(config.Keyword)),
+		categoryAPIPath+url.PathEscape(strings.ToLower(keyword)),
 		queryParams,
 	)
 	if err != nil {
