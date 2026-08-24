@@ -136,6 +136,21 @@ func (s *TemplateService) ReplaceNearbyLocations(
 	return nil
 }
 
+func (s *TemplateService) ReplaceBreadcrumbs(
+	doc *goquery.Document,
+	newHTML string,
+) error {
+	block := doc.Find(".breadcrubms-container")
+	if block.Length() == 0 {
+		return fmt.Errorf("breadcrumb block not found")
+	}
+
+	block.Empty()
+	block.AppendHtml(newHTML)
+
+	return nil
+}
+
 func (s *TemplateService) RenderHTML(doc *goquery.Document) (string, error) {
 	html, err := goquery.OuterHtml(doc.Selection)
 	if err != nil {

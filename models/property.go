@@ -10,7 +10,13 @@ type CategoryResponse struct {
 }
 
 type CategoryGeoInfo struct {
+	Name        string               `json:"Name"`
+	Breadcrumbs []CategoryBreadcrumb `json:"Breadcrumbs"`
+}
+
+type CategoryBreadcrumb struct {
 	Name string `json:"Name"`
+	Slug string `json:"Slug"`
 }
 
 type NearbyCities struct {

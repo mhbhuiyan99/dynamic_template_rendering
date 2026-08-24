@@ -41,3 +41,44 @@ func escapeSlug(slug string) string {
 	}
 	return strings.Join(parts, "/")
 }
+
+func RenderBreadcrumbs(
+	breadcrumbs []models.CategoryBreadcrumb,
+	currentName string,
+	currentKeyword string,
+) string {
+	var builder strings.Builder
+	currentSlug := strings.ReplaceAll(strings.ToLower(currentKeyword), ":", "/")
+	validBreadcrumbs := make([]models.CategoryBreadcrumb, 0, len(breadcrumbs))
+	for _, breadcrumb := range breadcrumbs {
+		if strings.ToLower(strings.Trim(breadcrumb.Slug, "/")) == currentSlug {
+			continue
+		}
+		validBreadcrumbs = append(validBreadcrumbs, breadcrumb)
+	}
+
+	for index, breadcrumb := range validBreadcrumbs {
+		if breadcrumb.Name == "" || breadcrumb.Slug == "" {
+			continue
+		}
+		if index > 0 {
+			builder.WriteString(" &gt; ")
+		}
+		builder.WriteString(`<a class="breadcrubms" href="/all/`)
+		builder.WriteString(escapeSlug(breadcrumb.Slug))
+		builder.WriteString(`">`)
+		builder.WriteString(template.HTMLEscapeString(breadcrumb.Name))
+		builder.WriteString(`</a>`)
+	}
+
+	if currentName != "" {
+		if len(validBreadcrumbs) > 0 {
+			builder.WriteString(" &gt; ")
+		}
+		builder.WriteString(`<span class="breadcrubms active">`)
+		builder.WriteString(template.HTMLEscapeString(currentName))
+		builder.WriteString(`</span>`)
+	}
+
+	return builder.String()
+}
