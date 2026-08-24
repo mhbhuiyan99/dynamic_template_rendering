@@ -38,7 +38,7 @@ func TestCategoryRequest_Fetch(t *testing.T) {
 	requestLayer := NewCategoryRequest(client)
 
 	result, err := requestLayer.Fetch(models.TileConfig{
-		Keyword: "usa:texas",
+		Keyword: "USA:TEXAS",
 		PT:      "5-7",
 		Order:   "1",
 	})

@@ -3,6 +3,7 @@ package requests
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"dynamic_template_rendering/models"
 )
@@ -42,7 +43,7 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 
 	requestURL, err := BuildURL(
 		r.client.BaseURL,
-		categoryAPIPath+url.PathEscape(config.Keyword),
+		categoryAPIPath+url.PathEscape(strings.ToLower(config.Keyword)),
 		queryParams,
 	)
 	if err != nil {
