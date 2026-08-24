@@ -82,3 +82,44 @@ func RenderBreadcrumbs(
 
 	return builder.String()
 }
+
+func RequestedBreadcrumbs(keyword string) ([]models.CategoryBreadcrumb, string) {
+	parts := strings.Split(strings.ToLower(keyword), ":")
+	if len(parts) == 0 || parts[0] == "" {
+		return nil, ""
+	}
+
+	breadcrumbs := make([]models.CategoryBreadcrumb, 0, len(parts)-1)
+	for index := 0; index < len(parts)-1; index++ {
+		name := displayLocationPart(parts[index])
+		if name == "" {
+			continue
+		}
+		breadcrumbs = append(breadcrumbs, models.CategoryBreadcrumb{
+			Name: name,
+			Slug: strings.Join(parts[:index+1], "/"),
+		})
+	}
+
+	currentName := displayLocationPart(parts[len(parts)-1])
+	return breadcrumbs, currentName
+}
+
+func displayLocationPart(part string) string {
+	part = strings.ReplaceAll(strings.TrimSpace(part), "-", " ")
+	if strings.EqualFold(part, "usa") {
+		return "USA"
+	}
+	if part == "" {
+		return ""
+	}
+
+	words := strings.Fields(part)
+	for index, word := range words {
+		if word == "" {
+			continue
+		}
+		words[index] = strings.ToUpper(word[:1]) + word[1:]
+	}
+	return strings.Join(words, " ")
+}

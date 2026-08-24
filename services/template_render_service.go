@@ -99,13 +99,14 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 	locationName := configuredLocationName(tileConfigs)
 	var nearbyLocations []models.NearbyCity
 	var breadcrumbs []models.CategoryBreadcrumb
+	breadcrumbName := ""
 	if location != "" {
+		breadcrumbs, breadcrumbName = renderers.RequestedBreadcrumbs(location)
 		nearbyResponse, err := s.tileService.GetNearbyResponse(location, 12)
 		if err != nil {
 			fmt.Printf("failed to get nearby locations: %v\n", err)
 		} else {
 			locationName = nearbyResponse.GeoInfo.Name
-			breadcrumbs = nearbyResponse.GeoInfo.Breadcrumbs
 			nearbyLocations = nearbyResponse.NearbyCities.Items
 			if len(nearbyLocations) == 0 {
 				nearbyLocations = nearbyResponse.Result.NearbyCities.Items
@@ -230,7 +231,7 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 		}
 		if err := s.templateService.ReplaceBreadcrumbs(
 			doc,
-			renderers.RenderBreadcrumbs(breadcrumbs, locationName, location),
+			renderers.RenderBreadcrumbs(breadcrumbs, breadcrumbName, location),
 		); err != nil {
 			fmt.Printf("failed to replace breadcrumbs: %v\n", err)
 		}
@@ -274,6 +275,11 @@ func (s *TemplateRenderService) renderPage(content string, err error) (string, e
 
 	<script
 		src="/static/js/category-template.js"
+		defer
+	></script>
+
+	<script
+		src="/static/js/fav-icon.js"
 		defer
 	></script>
 </head>

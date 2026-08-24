@@ -64,8 +64,9 @@ func (r *TileRenderer) renderPropertyTile(
 	image := template.HTMLEscapeString(
 		r.buildImageURL(property.Image),
 	)
+	placeholderImage := "/static/img/property-placeholder.svg"
 	if image == "" {
-		image = "/static/img/property-placeholder.svg"
+		image = placeholderImage
 	}
 
 	name := template.HTMLEscapeString(property.Name)
@@ -88,6 +89,11 @@ func (r *TileRenderer) renderPropertyTile(
 		propertyURL = r.baseURL + "/property/" + url.PathEscape(property.Slug) + "/" + url.PathEscape(property.ID)
 	}
 	propertyURL = template.HTMLEscapeString(propertyURL)
+	locationURL := ""
+	if property.LocationSlug != "" {
+		locationURL = "/all/" + escapeSlug(property.LocationSlug)
+	}
+	locationURL = template.HTMLEscapeString(locationURL)
 
 	propertyType := template.HTMLEscapeString(property.PropertyType)
 	attribute := template.HTMLEscapeString(property.PropertyAttribute)
@@ -111,8 +117,9 @@ func (r *TileRenderer) renderPropertyTile(
 				class="pres__property-image"
 				src="%s"
 				alt="%s"
+				onerror="this.onerror=null;this.src='%s'"
 			/>
-			<button class="tile-favorite" type="button" aria-label="Save property">&#9825;</button>
+			<button class="tile-favorite" type="button" data-property-id="%s" aria-label="Save property" aria-pressed="false">&#9825;</button>
 		</div>
 
 		<div class="pres__property-info">
@@ -142,16 +149,26 @@ func (r *TileRenderer) renderPropertyTile(
 		id,
 		image,
 		name,
+		placeholderImage,
+		id,
 		optionalType(propertyType),
 		propertyURL,
 		name,
-		location,
+		renderPropertyLocation(location, locationURL),
 		optionalRating(property.ReviewScore, property.ReviewCount),
 		optionalDetails(propertyType, attribute, property.Counts),
 		price,
 		optionalPartner(property.Feed),
 		ctaURL,
 	)
+}
+
+func renderPropertyLocation(location, locationURL string) string {
+	if locationURL == "" {
+		return location
+	}
+
+	return `<a href="` + locationURL + `">` + location + `</a>`
 }
 
 func optionalType(propertyType string) string {

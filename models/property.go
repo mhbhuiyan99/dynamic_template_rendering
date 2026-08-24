@@ -1,5 +1,7 @@
 package models
 
+import "strings"
+
 type CategoryResponse struct {
 	Error        interface{}     `json:"Error"`
 	Message      string          `json:"Message"`
@@ -45,11 +47,13 @@ type CategoryItem struct {
 }
 
 type GeoInfo struct {
-	City      string `json:"City"`
-	Country   string `json:"Country"`
-	Display   string `json:"Display"`
-	State     string `json:"State"`
-	StateAbbr string `json:"StateAbbr"`
+	City         string               `json:"City"`
+	Country      string               `json:"Country"`
+	Display      string               `json:"Display"`
+	LocationSlug string               `json:"LocationSlug"`
+	State        string               `json:"State"`
+	StateAbbr    string               `json:"StateAbbr"`
+	Breadcrumbs  []CategoryBreadcrumb `json:"Breadcrumbs"`
 }
 
 type PropertyData struct {
@@ -80,6 +84,7 @@ type Property struct {
 	Name              string
 	Image             string
 	Location          string
+	LocationSlug      string
 	Price             float64
 	PropertyType      string
 	Slug              string
@@ -92,11 +97,17 @@ type Property struct {
 }
 
 func ToProperty(item CategoryItem) Property {
+	locationSlug := buildLocationSlug(item.GeoInfo)
+	if locationSlug == "" {
+		locationSlug = item.GeoInfo.LocationSlug
+	}
+
 	return Property{
 		ID:                item.ID,
 		Name:              item.Property.PropertyName,
 		Image:             item.Property.FeatureImage,
 		Location:          item.GeoInfo.Display,
+		LocationSlug:      locationSlug,
 		Price:             item.Property.Price,
 		PropertyType:      item.Property.PropertyType,
 		Slug:              item.Property.PropertySlug,
@@ -107,4 +118,61 @@ func ToProperty(item CategoryItem) Property {
 		PartnerURL:        item.Partner.URL,
 		Feed:              item.Feed,
 	}
+}
+
+func buildLocationSlug(geoInfo GeoInfo) string {
+	displayParts := strings.Split(geoInfo.Display, ",")
+	if len(displayParts) > 1 {
+		slugParts := make([]string, 0, len(displayParts))
+		for index := len(displayParts) - 1; index >= 0; index-- {
+			part := strings.TrimSpace(displayParts[index])
+			if strings.EqualFold(part, "USA") || strings.EqualFold(part, "United States") {
+				part = "usa"
+			}
+			part = slugifyLocationPart(part)
+			if part != "" {
+				slugParts = append(slugParts, part)
+			}
+		}
+		return strings.Join(slugParts, "/")
+	}
+
+	country := geoInfo.Country
+	state := geoInfo.State
+	city := geoInfo.City
+	if state == "" || city == "" {
+		displayParts := strings.Split(geoInfo.Display, ",")
+		for index := range displayParts {
+			displayParts[index] = strings.TrimSpace(displayParts[index])
+		}
+		if city == "" && len(displayParts) > 0 {
+			city = displayParts[0]
+		}
+		if state == "" && len(displayParts) > 2 {
+			state = displayParts[len(displayParts)-2]
+		}
+		if country == "" && len(displayParts) > 1 {
+			country = displayParts[len(displayParts)-1]
+		}
+	}
+
+	parts := []string{country, state, city}
+	if strings.EqualFold(geoInfo.Country, "USA") || strings.EqualFold(geoInfo.Country, "United States") {
+		parts[0] = "usa"
+	}
+
+	slugParts := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = slugifyLocationPart(part)
+		if part != "" {
+			slugParts = append(slugParts, part)
+		}
+	}
+
+	return strings.Join(slugParts, "/")
+}
+
+func slugifyLocationPart(part string) string {
+	part = strings.ToLower(strings.TrimSpace(part))
+	return strings.NewReplacer("'", "", ",", "", ".", "", " ", "-").Replace(part)
 }
