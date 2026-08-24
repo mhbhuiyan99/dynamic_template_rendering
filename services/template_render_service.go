@@ -18,6 +18,12 @@ type templateData struct {
 	LocationName string
 }
 
+type tileFetchResult struct {
+	index      int
+	properties []models.Property
+	err        error
+}
+
 func configuredLocationName(tileConfigs []models.TileConfig) string {
 	for _, tileConfig := range tileConfigs {
 		if tileConfig.Keyword != "" {
@@ -96,17 +102,42 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 		return "", err
 	}
 
-	for _, tileConfig := range tileConfigs {
+	results := make(chan tileFetchResult, len(tileConfigs))
+	requestedTiles := 0
+	for index, tileConfig := range tileConfigs {
 		if tileConfig.TilesBlockID == "" {
 			continue
 		}
 
-		properties, err := s.tileService.GetProperties(tileConfig)
-		if err != nil {
+		requestedTiles++
+		go func(index int, tileConfig models.TileConfig) {
+			properties, err := s.tileService.GetProperties(tileConfig)
+			results <- tileFetchResult{
+				index:      index,
+				properties: properties,
+				err:        err,
+			}
+		}(index, tileConfig)
+	}
+
+	fetchedTiles := make([]tileFetchResult, len(tileConfigs))
+	for index := 0; index < requestedTiles; index++ {
+		result := <-results
+		fetchedTiles[result.index] = result
+	}
+	close(results)
+
+	for index, tileConfig := range tileConfigs {
+		if tileConfig.TilesBlockID == "" {
+			continue
+		}
+
+		result := fetchedTiles[index]
+		if result.err != nil {
 			fmt.Printf(
 				"failed to get properties for tile block %s: %v\n",
 				tileConfig.TilesBlockID,
-				err,
+				result.err,
 			)
 			if replaceErr := s.templateService.ReplaceTileBlockContent(
 				doc,
@@ -122,7 +153,7 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 			continue
 		}
 
-		tileHTML, err := s.tileRenderer.Render(properties)
+		tileHTML, err := s.tileRenderer.Render(result.properties)
 		if err != nil {
 			fmt.Printf(
 				"failed to render tile block %s: %v\n",
