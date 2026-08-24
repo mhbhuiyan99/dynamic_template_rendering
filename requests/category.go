@@ -10,6 +10,12 @@ import (
 
 const categoryAPIPath = "/api/v1/category/details/"
 
+const (
+	categoryDevice    = "desktop"
+	categoryItems     = "1"
+	categoryLocations = "US"
+)
+
 // CategoryRequest handles communication with the Category API.
 type CategoryRequest struct {
 	client *Client
@@ -28,6 +34,9 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 	}
 
 	queryParams := url.Values{}
+	queryParams.Set("device", categoryDevice)
+	queryParams.Set("items", categoryItems)
+	queryParams.Set("locations", categoryLocations)
 	if config.PT != "" {
 		queryParams.Set("pt", config.PT)
 	}
@@ -37,10 +46,6 @@ func (r *CategoryRequest) Fetch(config models.TileConfig) (*models.CategoryRespo
 	if config.Order != "" {
 		queryParams.Set("order", config.Order)
 	}
-	if len(queryParams) > 0 {
-		queryParams.Set("items", "1")
-	}
-
 	requestURL, err := BuildURL(
 		r.client.BaseURL,
 		categoryAPIPath+url.PathEscape(strings.ToLower(config.Keyword)),

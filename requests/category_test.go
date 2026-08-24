@@ -18,6 +18,9 @@ func TestCategoryRequest_Fetch(t *testing.T) {
 	) {
 		assert.Equal(t, http.MethodGet, request.Method)
 		assert.Equal(t, "/api/v1/category/details/usa:texas", request.URL.Path)
+		assert.Equal(t, "desktop", request.URL.Query().Get("device"))
+		assert.Equal(t, "1", request.URL.Query().Get("items"))
+		assert.Equal(t, "US", request.URL.Query().Get("locations"))
 		assert.Equal(t, "5-7", request.URL.Query().Get("pt"))
 		assert.Equal(t, "1", request.URL.Query().Get("order"))
 

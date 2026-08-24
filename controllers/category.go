@@ -11,8 +11,8 @@ import (
 type CategoryController struct {
 	web.Controller
 
-	categoryLocationService *services.CategoryLocationService
-	templateRenderService   *services.TemplateRenderService
+	CategoryLocationService *services.CategoryLocationService
+	TemplateRenderService   *services.TemplateRenderService
 }
 
 func NewCategoryController(
@@ -20,15 +20,23 @@ func NewCategoryController(
 	templateRenderService *services.TemplateRenderService,
 ) *CategoryController {
 	return &CategoryController{
-		categoryLocationService: categoryLocationService,
-		templateRenderService:   templateRenderService,
+		CategoryLocationService: categoryLocationService,
+		TemplateRenderService:   templateRenderService,
 	}
 }
 
 func (c *CategoryController) Get() {
+	if c.CategoryLocationService == nil || c.TemplateRenderService == nil {
+		c.CustomAbort(
+			http.StatusInternalServerError,
+			"category controller is not configured",
+		)
+		return
+	}
+
 	path := c.Ctx.Request.URL.Path
 
-	location, err := c.categoryLocationService.Parse(path)
+	location, err := c.CategoryLocationService.Parse(path)
 	if err != nil {
 		c.CustomAbort(
 			http.StatusBadRequest,
@@ -37,7 +45,7 @@ func (c *CategoryController) Get() {
 		return
 	}
 
-	html, err := c.templateRenderService.RenderPageForLocation(location.Keyword)
+	html, err := c.TemplateRenderService.RenderPageForLocation(location.Keyword)
 	if err != nil {
 		c.CustomAbort(http.StatusInternalServerError, err.Error())
 		return

@@ -82,3 +82,38 @@ func TestTemplateRenderService_Render(t *testing.T) {
 		assert.NotContains(t, result, "Old content")
 	})
 }
+
+func TestTemplateRenderService_ClearsTileBlockWhenAPIRequestFails(t *testing.T) {
+	templateService := NewTemplateService("dummy.txt")
+	tileService := &TileService{}
+	tileRenderer := renderers.NewTileRenderer("http://example.com", "http://imageservice.example.com")
+
+	service := NewTemplateRenderService(
+		templateService,
+		tileService,
+		tileRenderer,
+	)
+
+	patches := gomonkey.NewPatches()
+	defer patches.Reset()
+
+	patches.ApplyMethod(
+		templateService,
+		"LoadTemplate",
+		func(*TemplateService) (string, error) {
+			return `<div data-block="property-tiles" id="ile57am">Old content</div>`, nil
+		},
+	)
+	patches.ApplyMethod(
+		tileService,
+		"GetProperties",
+		func(*TileService, models.TileConfig) ([]models.Property, error) {
+			return nil, assert.AnError
+		},
+	)
+
+	result, err := service.Render()
+
+	assert.NoError(t, err)
+	assert.NotContains(t, result, "Old content")
+}

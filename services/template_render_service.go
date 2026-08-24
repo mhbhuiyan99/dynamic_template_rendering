@@ -108,6 +108,17 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 				tileConfig.TilesBlockID,
 				err,
 			)
+			if replaceErr := s.templateService.ReplaceTileBlockContent(
+				doc,
+				tileConfig.TilesBlockID,
+				"",
+			); replaceErr != nil {
+				fmt.Printf(
+					"failed to clear tile block %s: %v\n",
+					tileConfig.TilesBlockID,
+					replaceErr,
+				)
+			}
 			continue
 		}
 
@@ -118,6 +129,17 @@ func (s *TemplateRenderService) render(location string) (string, error) {
 				tileConfig.TilesBlockID,
 				err,
 			)
+			if replaceErr := s.templateService.ReplaceTileBlockContent(
+				doc,
+				tileConfig.TilesBlockID,
+				"",
+			); replaceErr != nil {
+				fmt.Printf(
+					"failed to clear tile block %s: %v\n",
+					tileConfig.TilesBlockID,
+					replaceErr,
+				)
+			}
 			continue
 		}
 
