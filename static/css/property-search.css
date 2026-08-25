@@ -1,0 +1,104 @@
+.property-date-modal {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  display: none;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+}
+
+.property-date-dialog,
+.property-guest-popup {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  color: #222;
+}
+
+.property-date-dialog {
+  max-width: calc(100vw - 32px);
+  padding: 20px;
+  width: 680px;
+}
+
+.property-date-header,
+.property-date-footer,
+.property-guest-footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.property-date-header h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.property-date-header button,
+.property-date-footer button,
+.property-guest-footer button,
+.property-guest-row button {
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.property-date-body {
+  padding: 20px 0;
+}
+
+.property-date-body input {
+  display: none;
+}
+
+.property-date-footer {
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.property-guest-popup {
+  display: none;
+  padding: 16px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 240px;
+  z-index: 20;
+}
+
+.property-guest-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.property-guest-row span:first-child {
+  margin-right: auto;
+}
+
+.property-guest-count {
+  min-width: 24px;
+  text-align: center;
+}
+
+.property-guest-footer {
+  border-top: 1px solid #eee;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.property-guest-footer button {
+  flex: 1;
+}
+
+@media (max-width: 700px) {
+  .property-date-dialog {
+    padding: 12px;
+    width: calc(100vw - 24px);
+  }
+}

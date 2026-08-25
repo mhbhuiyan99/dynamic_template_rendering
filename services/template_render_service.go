@@ -273,8 +273,28 @@ func (s *TemplateRenderService) renderPage(content string, err error) (string, e
 		href="/static/css/tile-overrides.css"
 	>
 
+	<link
+		rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css"
+	>
+
+	<link
+		rel="stylesheet"
+		href="/static/css/property-search.css"
+	>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"
+		defer
+	></script>
+
 	<script
 		src="/static/js/category-template.js"
+		defer
+	></script>
+
+	<script
+		src="/static/js/property-search.js"
 		defer
 	></script>
 
