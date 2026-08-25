@@ -4,6 +4,7 @@ package requests
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -58,6 +59,11 @@ func (c *Client) NewGETRequest(requestURL string) (*http.Request, error) {
 
 	request.SetBasicAuth(c.Username, c.Password)
 	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Accept-Language", "en-US")
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("X-Requested-With", "XMLHttpRequest")
+	request.Header.Set("User-Agent", "desktop")
+	request.Header.Set("Origin", "123presto-MS-ROW.com")
 	if c.APIKey != "" {
 		request.Header.Set("x-api-key", c.APIKey)
 	}
@@ -81,11 +87,19 @@ func (c *Client) Do(request *http.Request, target interface{}) error {
 	}
 	defer response.Body.Close()
 
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("read response body: %w", err)
+	}
+
+	// TEMP DEBUG — remove after diagnosing
+	fmt.Printf("\n\n=== RAW RESPONSE from %s ===\n%s\n=== END ===\n\n", request.URL.String(), string(body))
+
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("unexpected HTTP status: %d", response.StatusCode)
 	}
 
-	if err := json.NewDecoder(response.Body).Decode(target); err != nil {
+	if err := json.Unmarshal(body, target); err != nil {
 		return fmt.Errorf("decode response failed: %w", err)
 	}
 

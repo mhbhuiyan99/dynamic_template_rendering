@@ -57,6 +57,7 @@ func init() {
 
 	propertyService := services.NewPropertyService(
 		propertyRequest,
+		apiConfig.ImageBaseURL,
 	)
 
 	controller := controllers.NewCustomTemplateController(

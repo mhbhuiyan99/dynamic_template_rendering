@@ -64,7 +64,7 @@ function increaseGuest() {
 
 function decreaseGuest() {
 
-    if (guestCount > 0)
+    if (guestCount > 1)
         guestCount--;
 
     updateGuestUI();
