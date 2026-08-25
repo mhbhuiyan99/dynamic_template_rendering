@@ -12,16 +12,27 @@ import (
 
 func init() {
 	apiConfig := config.LoadAPIConfig()
-	categoryRequest := requests.NewCategoryRequest(
-		requests.NewClient(
-			apiConfig.BaseURL,
-			apiConfig.Username,
-			apiConfig.Password,
-			apiConfig.APIKey,
-		),
+	client := requests.NewClient(
+		apiConfig.BaseURL,
+		apiConfig.Username,
+		apiConfig.Password,
+		apiConfig.APIKey,
 	)
+
+	categoryRequest := requests.NewCategoryRequest(client)
 	categoryService := services.NewCategoryService(categoryRequest)
 
+	locationRequest := requests.NewLocationRequest(client)
+	locationService := services.NewLocationService(locationRequest)
+
+	locationController := controllers.NewLocationController(
+		locationService,
+	)
+
+	web.Router(
+		"/api/location",
+		locationController,
+	)
 	tileService := services.NewTileService(
 		categoryService,
 	)
@@ -39,6 +50,13 @@ func init() {
 		templateService,
 		tileService,
 		tileRenderer,
+	)
+	propertyRequest := requests.NewPropertyRequest(
+		client,
+	)
+
+	propertyService := services.NewPropertyService(
+		propertyRequest,
 	)
 
 	controller := controllers.NewCustomTemplateController(
@@ -60,5 +78,29 @@ func init() {
 	web.Router(
 		"/all/*",
 		categoryController,
+	)
+
+	refineController := controllers.NewRefineController()
+
+	web.Router(
+		"/refine",
+		refineController,
+	)
+
+
+	propertyController := controllers.NewPropertyController(
+		propertyService,
+	)
+
+	web.Router(
+		"/api/properties",
+		propertyController,
+		"get:GetProperties",
+	)
+
+	web.Router(
+		"/api/property-details",
+		propertyController,
+		"get:GetPropertyDetails",
 	)
 }

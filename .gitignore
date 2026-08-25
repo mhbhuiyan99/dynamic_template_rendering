@@ -3,3 +3,5 @@ conf/app.conf
 
 *.test
 *.out
+*.exe
+*.exe~
