@@ -111,6 +111,41 @@ type PropertyLocationCategory struct {
 	Name string `json:"Name"`
 }
 
+type PropertyListRequest struct {
+	Category  string
+	Locations string
+
+	Order  int
+	Page   int
+	Limit  int
+	Items  int
+	Device string
+
+	StartDate string
+	EndDate   string
+
+	Pax string
+
+	Amount string
+
+	Amenities string
+
+	PetFriendly string
+
+	EcoFriendly string
+}
+
+type PropertyListResponse struct {
+	Success bool            `json:"Success"`
+	GeoInfo PropertyGeoInfo `json:"GeoInfo"`
+	Result  PropertyResult  `json:"Result"`
+}
+
+type PropertyResult struct {
+	Count   int      `json:"Count"`
+	ItemIDs []string `json:"ItemIDs"`
+}
+
 func ToProperty(item CategoryItem) Property {
 	locationSlug := buildLocationSlug(item.GeoInfo)
 	if locationSlug == "" {

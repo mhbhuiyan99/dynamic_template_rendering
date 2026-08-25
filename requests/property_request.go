@@ -33,7 +33,7 @@ func (r *PropertyRequest) GetProperties(
 	amenities []string,
 	petFriendly string,
 	ecoFriendly string,
-) (*models.CategoryResponse, error) {
+) (*models.PropertyListResponse, error) {
 
 	if r == nil || r.client == nil {
 		return nil, fmt.Errorf("property request is not configured")
@@ -92,7 +92,7 @@ func (r *PropertyRequest) GetProperties(
 		return nil, err
 	}
 
-	var response models.CategoryResponse
+	var response models.PropertyListResponse
 
 	if err := r.client.Do(request, &response); err != nil {
 		return nil, err
@@ -111,6 +111,11 @@ func (r *PropertyRequest) GetPropertyDetails(
 
 	if len(propertyIDs) == 0 {
 		return nil, fmt.Errorf("property ID list is empty")
+	}
+
+	// TEMP DEBUG — remove after testing
+	if len(propertyIDs) > 20 {
+		propertyIDs = propertyIDs[:20]
 	}
 
 	query := url.Values{}
