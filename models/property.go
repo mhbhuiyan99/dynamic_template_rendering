@@ -96,6 +96,21 @@ type Property struct {
 	Feed              int
 }
 
+type PropertyGeoInfo struct {
+	CountryCode  string `json:"CountryCode"`
+	LocationSlug string `json:"LocationSlug"`
+
+	// For Property Details API
+	City               string     `json:"City"`
+	State              string     `json:"State"`
+	DistanceFromCenter string     `json:"DistanceFromCenter"`
+	Categories         []PropertyLocationCategory `json:"Categories"`
+}
+
+type PropertyLocationCategory struct {
+	Name string `json:"Name"`
+}
+
 func ToProperty(item CategoryItem) Property {
 	locationSlug := buildLocationSlug(item.GeoInfo)
 	if locationSlug == "" {

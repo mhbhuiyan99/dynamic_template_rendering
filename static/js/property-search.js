@@ -91,7 +91,7 @@
       input.value = guestCount ? `${guestCount} Guests` : "";
     };
     popup.querySelector(".property-guest-minus").onclick = () => {
-      guestCount = Math.max(0, guestCount - 1);
+      guestCount = Math.max(1, guestCount - 1);
       update();
     };
     popup.querySelector(".property-guest-plus").onclick = () => {
