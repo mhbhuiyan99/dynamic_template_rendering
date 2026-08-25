@@ -2,6 +2,8 @@
 
 A Go and Beego application that renders a category page from an HTML template and dynamically replaces property-tile placeholders with property data returned by an external category API.
 
+This project reuses the existing [refine-portal](https://github.com/mhbhuiyan99/refine-portal) implementation as the starting point for Assignment 8. The assignment extends the existing property search component and connects it to the refine results page without changing the supplied search-bar layout.
+
 ## Requirements
 
 - Go `1.25` or later
@@ -56,6 +58,10 @@ The application exposes these page endpoints:
 | `GET` | `/all/{country}` | Renders a dynamic category page |
 | `GET` | `/all/{country}/{state}` | Renders a dynamic category page |
 | `GET` | `/all/{country}/{state}/{city}` | Renders a dynamic category page |
+| `GET` | `/refine` | Renders the property refine page from search query parameters |
+| `GET` | `/api/location` | Resolves a typed location for the refine page |
+| `GET` | `/api/properties` | Fetches properties using location, dates, guests, and refine filters |
+| `GET` | `/api/property-details` | Fetches details for the returned property IDs |
 
 Static styles and scripts are served from `/static/` by Beego.
 
@@ -161,6 +167,49 @@ Page breadcrumbs are generated from the requested URL, not from a nearby propert
 ```
 
 Breadcrumb links use the accumulated `/all/...` slug for each parent level.
+
+### Assignment 8: Property Search and Refine Page
+
+The existing property search component in `views/custom_template.txt` is wired to the behavior in `static/js/property-search.js`. Its layout and styling remain unchanged.
+
+Search behavior:
+
+- Location is captured from the editable text input. It supports manually entered values such as `Dhaka, Bangladesh`, `USA`, and `Texas`; no autocomplete or external location suggestions are used.
+- The date control opens a Flatpickr range picker with month navigation, selected states, `YYYY-MM-DD` output, and a minimum date of today. Search submission requires both dates and rejects past dates or a checkout date before check-in.
+- The guest control opens a popup with increment, decrement, clear, and done actions. Guests are limited to 1–30; clearing the control displays an empty guest value until another count is selected.
+- Date and guest panels close when clicking outside, and opening one panel closes any other active panel.
+- The Browse Rentals button validates the location, date range, and guest count before redirecting to the refine page.
+
+The search values use the following query-parameter mapping:
+
+| Search value | Query parameter |
+| --- | --- |
+| Location | `search` |
+| Check-in date | `dateStart` |
+| Check-out date | `dateEnd` |
+| Guest count | `pax` |
+
+For example:
+
+```text
+/refine?search=dhaka%2C%20bangladesh&dateStart=2026-05-01&dateEnd=2026-05-05&pax=2
+```
+
+The refine page reads these values from the URL in `controllers/refine.go` and `static/js/refine.js`. It resolves the location, requests matching properties through `/api/properties`, loads their details through `/api/property-details`, and renders the existing property cards. Existing filters, date selection, guest selection, amenities, price range, currency selection, sorting, and reload behavior continue to update the refine URL and refresh the displayed results.
+
+Assignment 8 flow:
+
+```text
+Property search component
+   -> validate location, dates, and guests
+   -> redirect to /refine?search=...&dateStart=...&dateEnd=...&pax=...
+   -> RefineController renders refine.tpl
+   -> refine.js reads URL parameters
+   -> resolve location through /api/location
+   -> fetch filtered properties through /api/properties
+   -> fetch property details through /api/property-details
+   -> render cards, filters, sorting, and tiles
+```
 
 ### Tile UI Behavior
 
